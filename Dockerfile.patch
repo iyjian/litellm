@@ -1,0 +1,2 @@
+FROM litellm/litellm:v1.88.3
+COPY litellm/litellm_core_utils/litellm_logging.py /app/.venv/lib/python3.13/site-packages/litellm/litellm_core_utils/litellm_logging.py

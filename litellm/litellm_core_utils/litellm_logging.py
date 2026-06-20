@@ -3483,23 +3483,32 @@ class Logging(LiteLLMLoggingBaseClass):
             (ResponseCompletedEvent, ResponseIncompleteEvent, ResponseFailedEvent),
         ):
             ## return unified Usage object
-            if isinstance(result.response.usage, ResponseAPIUsage):
+            response = result.response
+            usage = (
+                response.get("usage")
+                if isinstance(response, dict)
+                else getattr(response, "usage", None)
+            )
+            if isinstance(usage, ResponseAPIUsage) or (
+                isinstance(usage, dict)
+                and ResponseAPILoggingUtils._is_response_api_usage(usage)
+            ):
                 transformed_usage = (
                     ResponseAPILoggingUtils._transform_response_api_usage_to_chat_usage(
-                        result.response.usage
+                        usage
                     )
                 )
                 # Set as dict instead of Usage object so model_dump() serializes it correctly
-                setattr(
-                    result.response,
-                    "usage",
-                    (
-                        transformed_usage.model_dump()
-                        if hasattr(transformed_usage, "model_dump")
-                        else dict(transformed_usage)
-                    ),
+                transformed_usage_dict = (
+                    transformed_usage.model_dump()
+                    if hasattr(transformed_usage, "model_dump")
+                    else dict(transformed_usage)
                 )
-            return result.response
+                if isinstance(response, dict):
+                    response["usage"] = transformed_usage_dict
+                else:
+                    setattr(response, "usage", transformed_usage_dict)
+            return response
         else:
             return None
 
