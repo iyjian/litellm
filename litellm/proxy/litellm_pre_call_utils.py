@@ -111,6 +111,7 @@ LITELLM_METADATA_ROUTES = (
     "/v1/messages",
     "responses",
     "files",
+    "/images/edits",
 )
 
 _UNTRUSTED_ROOT_CONTROL_FIELDS = (
